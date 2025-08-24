@@ -209,8 +209,13 @@ class LocationService {
           'Unable to determine location. Make sure GPS is enabled and try again.',
           true
         );
-      } else if (error instanceof LocationError) {
-        throw error; // Re-throw our custom errors
+      } else if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        'canRetry' in error
+      ) {
+        throw error as LocationError; // Re-throw our custom errors
       } else {
         throw this.createLocationError(
           'NETWORK_ERROR',
