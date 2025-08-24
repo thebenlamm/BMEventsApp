@@ -78,13 +78,13 @@ class DataService {
 
   /**
    * Fetch data from URL with error handling
-   */
+  */
   private async fetchFromURL(url: string): Promise<any> {
+    // Create timeout with AbortController for broader compatibility
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     try {
-      // Create timeout with AbortController for broader compatibility
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-      
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -93,8 +93,6 @@ class DataService {
         },
         signal: controller.signal,
       });
-      
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -105,6 +103,8 @@ class DataService {
     } catch (error) {
       console.error(`Error fetching data from ${url}:`, error);
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
