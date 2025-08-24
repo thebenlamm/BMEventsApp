@@ -63,6 +63,22 @@ export const HighContrastColors = {
   statusUpcoming: '#00ff00', // Pure green
   statusEnded: '#808080',    // Standard gray
   
+  // Enhanced event type colors (high contrast versions)
+  eventParty: '#8a2be2',     // Blue violet
+  eventFood: '#ff8c00',      // Dark orange
+  eventDrinks: '#00ced1',    // Dark turquoise
+  eventArts: '#ff1493',      // Deep pink
+  eventWork: '#00bfff',      // Deep sky blue
+  eventKid: '#ffd700',       // Gold
+  eventAdult: '#dc143c',     // Crimson
+  eventOther: '#808080',     // Gray
+  
+  // Utility colors (high contrast)
+  success: '#00ff00',        // Pure green
+  warning: '#ffff00',        // Pure yellow
+  danger: '#ff0000',         // Pure red
+  info: '#00bfff',           // Deep sky blue
+  
   // High contrast overlays
   overlay: 'rgba(0, 0, 0, 0.9)',              // Darker overlay
   cardBackground: 'rgba(255, 255, 255, 1.0)', // Solid white
@@ -112,17 +128,25 @@ export const BorderRadius = {
   round: 50,
 };
 
-// Touch Targets (desert-optimized for harsh conditions)
+// Touch Targets (desert-optimized for harsh conditions & accessibility)
 export const TouchTargets = {
-  // Minimum touch target sizes
-  minButton: 60,
-  minTab: 48,
-  minCheckbox: 44,
+  // Minimum touch target sizes (WCAG AAA compliant)
+  minButton: 60,        // Exceeds WCAG minimum of 44px
+  minTab: 48,          // Meets WCAG minimum
+  minCheckbox: 44,     // Meets WCAG minimum
   
-  // Recommended sizes
-  primaryButton: 80,
-  secondaryButton: 60,
-  iconButton: 48,
+  // Recommended sizes for desert conditions
+  primaryButton: 80,    // Large for gloved fingers
+  secondaryButton: 60,  // Standard for desert use
+  iconButton: 48,       // Minimum for precise touch
+  
+  // Accessibility-focused sizes
+  accessibleButton: 88, // Extra large for motor impairments
+  accessibleTab: 60,    // Larger tab targets
+  
+  // Spacing for touch targets
+  minSpacing: 8,        // Minimum space between targets
+  recommendedSpacing: 16, // Recommended space for accuracy
 };
 
 // Shadows (subtle for high contrast readability)
@@ -256,6 +280,56 @@ export const AppConfig = {
   maxCacheAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
 
+// Accessibility Configuration (WCAG AAA compliant)
+export const AccessibilityConfig = {
+  // Text and content accessibility
+  text: {
+    minContrastRatio: 7.1,    // WCAG AAA standard
+    maxFontSizeMultiplier: 2.0, // Maximum font scaling
+    defaultFontSizeMultiplier: 1.0,
+    minLineHeight: 1.5,       // WCAG recommendation
+    maxLineLength: 80,        // Characters per line for readability
+  },
+  
+  // Touch and interaction accessibility  
+  touch: {
+    minTargetSize: 44,        // WCAG minimum (we use 60+ for desert conditions)
+    minSpacing: 8,            // Minimum space between targets
+    hapticFeedback: true,     // Vibration for touch confirmation
+    longPressTimeout: 500,    // Milliseconds for long press
+    doubleTapTimeout: 300,    // Milliseconds for double tap
+  },
+  
+  // Visual accessibility
+  visual: {
+    animationDuration: {
+      none: 0,                // For reduced motion
+      short: 150,             // Quick transitions
+      normal: 250,            // Standard animations
+      long: 350,              // Extended animations
+    },
+    focusIndicator: {
+      width: 3,               // Focus ring width
+      color: Colors.playaOrange, // High contrast focus color
+      offset: 2,              // Distance from element
+    },
+    transparency: {
+      none: 1.0,              // Opaque for reduced transparency
+      light: 0.9,             // Slight transparency
+      medium: 0.7,            // Standard transparency
+      heavy: 0.5,             // High transparency
+    },
+  },
+  
+  // Screen reader optimization
+  screenReader: {
+    speakingRate: 'normal',   // Speech rate preference
+    announceChanges: true,    // Announce dynamic content changes
+    groupRelatedContent: true, // Group related elements
+    provideLandmarks: true,   // Use semantic landmarks
+  },
+};
+
 // Desert Optimization Settings
 export const DesertOptimization = {
   // High contrast mode settings
@@ -310,5 +384,6 @@ export default {
   EventTypeConfig,
   StatusConfig,
   AppConfig,
+  AccessibilityConfig,
   DesertOptimization,
 };

@@ -6,6 +6,8 @@ export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
   type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  accessibilityRole?: 'header' | 'link' | 'text' | 'button';
+  accessibilityLevel?: 1 | 2 | 3 | 4 | 5 | 6;
 };
 
 export function ThemedText({
@@ -13,9 +15,32 @@ export function ThemedText({
   lightColor,
   darkColor,
   type = 'default',
+  accessibilityRole,
+  accessibilityLevel,
   ...rest
 }: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+
+  // Set default accessibility properties based on text type
+  const getAccessibilityProps = () => {
+    if (accessibilityRole || accessibilityLevel) {
+      return {
+        accessibilityRole: accessibilityRole || (type === 'title' || type === 'subtitle' ? 'header' : 'text'),
+        ...(accessibilityLevel && { accessibilityLevel }),
+      };
+    }
+
+    switch (type) {
+      case 'title':
+        return { accessibilityRole: 'header' as const, accessibilityLevel: 1 };
+      case 'subtitle':
+        return { accessibilityRole: 'header' as const, accessibilityLevel: 2 };
+      case 'link':
+        return { accessibilityRole: 'link' as const };
+      default:
+        return { accessibilityRole: 'text' as const };
+    }
+  };
 
   return (
     <Text
@@ -28,6 +53,9 @@ export function ThemedText({
         type === 'link' ? styles.link : undefined,
         style,
       ]}
+      allowFontScaling={true}
+      maxFontSizeMultiplier={2.0}
+      {...getAccessibilityProps()}
       {...rest}
     />
   );

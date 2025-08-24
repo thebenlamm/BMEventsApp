@@ -46,7 +46,7 @@ export default function SettingsScreen() {
 
   const handleExportFavorites = useCallback(async () => {
     try {
-      const exportData = await exportFavorites();
+      await exportFavorites();
       Alert.alert(
         'Export Favorites',
         `Exported ${favoritesCount} favorites.\n\nShare this data to backup your favorites:`,
@@ -58,7 +58,7 @@ export default function SettingsScreen() {
           { text: 'Close', style: 'cancel' },
         ]
       );
-    } catch (error) {
+    } catch {
       Alert.alert('Export Error', 'Failed to export favorites.');
     }
   }, [exportFavorites, favoritesCount]);

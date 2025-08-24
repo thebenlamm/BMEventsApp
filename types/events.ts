@@ -266,22 +266,4 @@ export interface ViewState {
   searchQuery: string;
 }
 
-export default {
-  // Export all types for easy importing
-  EventTypeAbbr,
-  EventStatus,
-  SortType,
-  RawEvent,
-  ProcessedEvent,
-  ArtInstallation,
-  Camp,
-  EventFilters,
-  SearchParams,
-  AppSettings,
-  FavoriteEvent,
-  LoadingState,
-  DataError,
-  EventStats,
-  QuickAction,
-  ViewState,
-};
+// All types are already exported above
