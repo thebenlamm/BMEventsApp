@@ -66,8 +66,8 @@ export function useFavorites(): UseFavoritesResult {
     
     try {
       const favorites = await favoritesService.getFavorites();
-      const favoriteIds = await favoritesService.getFavoriteIds();
-      
+      const favoriteIds = new Set(favorites.map(f => f.id));
+
       setState(prev => ({
         ...prev,
         favorites,
