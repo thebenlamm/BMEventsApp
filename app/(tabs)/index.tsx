@@ -60,29 +60,6 @@ export default function EventsScreen() {
 
   // Favorites integration
   const { isFavorite, toggleFavorite } = useFavorites();
-
-
-  // Load events when component mounts
-  useEffect(() => {
-    if (hasLocation || isDefaultLocation) {
-      loadEventsWithLocation();
-    }
-  }, []); // Only run once on mount
-
-  // Reload when location changes
-  useEffect(() => {
-    if (hasLocation || isDefaultLocation) {
-      loadEventsWithLocation();
-    }
-  }, [hasLocation, isDefaultLocation]);
-
-  // Reload when filters change
-  useEffect(() => {
-    if (hasLocation || isDefaultLocation) {
-      loadEventsWithLocation();
-    }
-  }, [filters]);
-
   // Load events function for refresh
   const loadEventsWithLocation = useCallback(async (refreshing = false) => {
     if (!hasLocation && !isDefaultLocation) return;
@@ -133,6 +110,13 @@ export default function EventsScreen() {
       }));
     }
   }, [hasLocation, isDefaultLocation, filters, location]);
+
+  // Load events whenever location or filters change
+  useEffect(() => {
+    if (hasLocation || isDefaultLocation) {
+      loadEventsWithLocation();
+    }
+  }, [loadEventsWithLocation, hasLocation, isDefaultLocation]);
 
   const handleRefresh = useCallback(() => {
     loadEventsWithLocation(true);
