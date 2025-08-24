@@ -47,9 +47,14 @@ export class EventProcessor {
     this.artMapCache = await dataService.getArtMap();
     this.campMapCache = await dataService.getCampMap();
 
-    const hasGPS = typeof lat === 'number' && typeof lon === 'number' && 
+    const hasGPS = typeof lat === 'number' && typeof lon === 'number' &&
                    Number.isFinite(lat) && Number.isFinite(lon);
     const upcomingCutoff = new Date(now.getTime() + timeWindow * 60 * 1000);
+
+    // Pre-fetch favorite IDs when filtering by favorites to avoid repeated async calls
+    const favoriteIds = showOnlyFavorites
+      ? await favoritesService.getFavoriteIds()
+      : null;
 
     const processedEvents: ProcessedEvent[] = [];
 
@@ -99,8 +104,7 @@ export class EventProcessor {
         // Apply favorites filter
         if (showOnlyFavorites) {
           const eventId = `${event.uid}_${occurrence.start_time}`;
-          const isFavorite = await favoritesService.isFavorite(eventId);
-          if (!isFavorite) {
+          if (!favoriteIds?.has(eventId)) {
             continue;
           }
         }
