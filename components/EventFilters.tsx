@@ -5,7 +5,6 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-  View,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -23,7 +22,7 @@ export interface FilterOptions {
   showOnlyActive: boolean;
   showOnlyUpcoming: boolean;
   showOnlyFavorites: boolean;
-  sortBy: 'default' | 'distance' | 'time' | 'type';
+  sortBy: 'default' | 'distance' | 'time' | 'ending' | 'type' | 'title';
 }
 
 interface EventFiltersProps {
@@ -67,7 +66,9 @@ const SORT_OPTIONS = [
   { value: 'default', label: 'Smart Sort', icon: '✨' },
   { value: 'distance', label: 'Distance', icon: '📍' },
   { value: 'time', label: 'Time', icon: '⏰' },
+  { value: 'ending', label: 'Ending Soon', icon: '⏳' },
   { value: 'type', label: 'Type', icon: '🏷️' },
+  { value: 'title', label: 'A-Z', icon: '🔤' },
 ];
 
 export function EventFilters({
@@ -135,11 +136,18 @@ export function EventFilters({
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={onClose}
+      accessibilityViewIsModal={true}
     >
       <ThemedView style={styles.container}>
         {/* Header */}
         <ThemedView style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity 
+            onPress={onClose} 
+            style={styles.closeButton}
+            accessibilityRole="button"
+            accessibilityLabel="Close filters"
+            accessibilityHint="Closes the filter modal without applying changes"
+          >
             <ThemedText style={styles.closeButtonText}>✕</ThemedText>
           </TouchableOpacity>
           
@@ -147,7 +155,13 @@ export function EventFilters({
             🔍 Filters
           </ThemedText>
           
-          <TouchableOpacity onPress={handleResetFilters} style={styles.resetButton}>
+          <TouchableOpacity 
+            onPress={handleResetFilters} 
+            style={styles.resetButton}
+            accessibilityRole="button"
+            accessibilityLabel="Reset all filters"
+            accessibilityHint="Resets all filters to default values"
+          >
             <ThemedText style={styles.resetButtonText}>Reset</ThemedText>
           </TouchableOpacity>
         </ThemedView>

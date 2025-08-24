@@ -44,6 +44,31 @@ export const Colors = {
   darkOverlay: 'rgba(0, 0, 0, 0.5)',
 };
 
+// High Contrast Colors for desert conditions
+export const HighContrastColors = {
+  // Enhanced contrast versions
+  playaOrange: '#ff4500', // More vivid orange
+  playaGold: '#ffd700',   // Brighter gold
+  playaPurple: '#1a0530', // Darker purple for better contrast
+  
+  // Enhanced desert colors
+  desertTan: '#deb887',   // Lighter tan
+  dustGray: '#696969',    // Higher contrast gray
+  nightBlack: '#000000',  // Pure black
+  brightWhite: '#ffffff', // Pure white
+  
+  // Enhanced status colors
+  statusLive: '#ff0000',     // Pure red for maximum visibility
+  statusSoon: '#ffff00',     // Pure yellow
+  statusUpcoming: '#00ff00', // Pure green
+  statusEnded: '#808080',    // Standard gray
+  
+  // High contrast overlays
+  overlay: 'rgba(0, 0, 0, 0.9)',              // Darker overlay
+  cardBackground: 'rgba(255, 255, 255, 1.0)', // Solid white
+  darkOverlay: 'rgba(0, 0, 0, 0.8)',          // Darker overlay
+};
+
 // Typography
 export const Typography = {
   // Font Families
@@ -231,8 +256,50 @@ export const AppConfig = {
   maxCacheAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
 
+// Desert Optimization Settings
+export const DesertOptimization = {
+  // High contrast mode settings
+  highContrast: {
+    enabled: false, // Can be toggled in settings
+    textShadowStrength: 3, // Stronger text shadows for sunlight readability
+    borderWidths: 2, // Thicker borders for better definition
+    minContrastRatio: 7, // WCAG AAA standard
+  },
+  
+  // Touch target enhancements for dusty/gloved fingers
+  touchEnhancements: {
+    minTouchSize: 60, // Already implemented in TouchTargets
+    spacing: 8, // Minimum space between touch targets
+    hapticFeedback: true, // Enable vibration feedback
+  },
+  
+  // Battery optimization for desert conditions
+  batteryOptimization: {
+    reducedAnimations: false, // Can be toggled in settings
+    lowerFrameRate: false, // Reduce to 30fps if needed
+    backgroundTaskLimiting: true, // Limit background processing
+  },
+  
+  // Visual enhancements for harsh sunlight
+  sunlightReadability: {
+    maxBrightness: true, // Force max brightness for outdoor use
+    antiGlareColors: true, // Use matte colors instead of glossy
+    largeTextMode: false, // Can be toggled for vision assistance
+    iconEnhancements: true, // Use high-contrast icons
+  },
+  
+  // Dust/weather resistance UI patterns
+  weatherResistance: {
+    simplifiedNavigation: true, // Reduce complex gestures
+    quickActions: true, // Prominently display quick actions
+    offlineFirst: true, // Prioritize cached data
+    errorTolerance: 'high', // Be forgiving with user interactions
+  },
+};
+
 export default {
   Colors,
+  HighContrastColors,
   Typography,
   Spacing,
   BorderRadius,
@@ -243,4 +310,5 @@ export default {
   EventTypeConfig,
   StatusConfig,
   AppConfig,
+  DesertOptimization,
 };

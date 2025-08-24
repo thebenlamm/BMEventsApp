@@ -92,8 +92,25 @@ export function CountdownTimer({
     isUrgent && urgentStyle,
   ];
 
+  // Create accessibility label
+  const accessibilityLabel = useMemo(() => {
+    if (countdown.hasEnded) {
+      return 'Event has ended';
+    } else if (countdown.isActive) {
+      return `Event is happening now, ends in ${getCountdownText().replace(/[⏰🔴⚡⏹️]/g, '').trim()}`;
+    } else if (countdown.isStartingSoon) {
+      return `Event starting soon, in ${getCountdownText().replace(/[⏰🔴⚡⏹️]/g, '').trim()}`;
+    } else {
+      return `Event starts in ${getCountdownText().replace(/[⏰🔴⚡⏹️]/g, '').trim()}`;
+    }
+  }, [countdown, getCountdownText]);
+
   return (
-    <ThemedView style={style}>
+    <ThemedView 
+      style={style}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="timer"
+    >
       <ThemedText style={finalTextStyle}>
         {getStatusIcon()}{getCountdownText()}
       </ThemedText>

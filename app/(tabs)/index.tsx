@@ -36,7 +36,7 @@ export default function EventsScreen() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [filters, setFilters] = useState<FilterOptions>({
+  const [filters, setFilters] = useState<FilterOptions>(() => ({
     eventTypes: ['prty', 'food', 'tea', 'arts', 'work', 'kid', 'adlt', 'othr'],
     radius: AppConfig.defaultRadius,
     timeWindow: AppConfig.defaultTimeWindow,
@@ -44,7 +44,7 @@ export default function EventsScreen() {
     showOnlyUpcoming: false,
     showOnlyFavorites: false,
     sortBy: 'default',
-  });
+  }));
 
   // Location services integration
   const {
@@ -62,8 +62,31 @@ export default function EventsScreen() {
   const { isFavorite, toggleFavorite } = useFavorites();
 
 
-  // Load events function that doesn't depend on location state
-  const loadEventsWithLocation = useCallback(async (refreshing = false, userLocation?: any) => {
+  // Load events when component mounts
+  useEffect(() => {
+    if (hasLocation || isDefaultLocation) {
+      loadEventsWithLocation();
+    }
+  }, []); // Only run once on mount
+
+  // Reload when location changes
+  useEffect(() => {
+    if (hasLocation || isDefaultLocation) {
+      loadEventsWithLocation();
+    }
+  }, [hasLocation, isDefaultLocation]);
+
+  // Reload when filters change
+  useEffect(() => {
+    if (hasLocation || isDefaultLocation) {
+      loadEventsWithLocation();
+    }
+  }, [filters]);
+
+  // Load events function for refresh
+  const loadEventsWithLocation = useCallback(async (refreshing = false) => {
+    if (!hasLocation && !isDefaultLocation) return;
+
     try {
       setLoadingState(prev => ({
         ...prev,
@@ -72,12 +95,9 @@ export default function EventsScreen() {
         error: undefined,
       }));
 
-      // Use provided location or get current location from hook
-      const currentLocation = userLocation || location;
-      
       const searchParams: SearchParams = {
-        lat: currentLocation?.coords.lat,
-        lon: currentLocation?.coords.lon,
+        lat: location?.coords.lat,
+        lon: location?.coords.lon,
         radius: filters.radius,
         window: filters.timeWindow,
         year: AppConfig.defaultYear,
@@ -89,34 +109,22 @@ export default function EventsScreen() {
       };
 
       const processedEvents = await eventProcessor.processEvents(searchParams);
-
-      // Sort events based on selected criteria
-      const sortedEvents = eventProcessor.sortEvents(processedEvents, filters.sortBy);
-      
-      // Take first 20 events for initial display
+      const uniqueEvents = processedEvents.filter((event, index, array) => 
+        array.findIndex(e => e.id === event.id) === index
+      );
+      const sortedEvents = eventProcessor.sortEvents(uniqueEvents, filters.sortBy);
       setEvents(sortedEvents.slice(0, 20));
 
     } catch (error) {
       console.error('Error loading events:', error);
-      const dataError: DataError = {
-        type: 'network',
-        message: error instanceof Error ? error.message : 'Failed to load events',
-        details: error,
-      };
-      
       setLoadingState(prev => ({
         ...prev,
-        error: dataError,
+        error: {
+          type: 'network',
+          message: error instanceof Error ? error.message : 'Failed to load events',
+          details: error,
+        } as DataError,
       }));
-
-      Alert.alert(
-        'Loading Error',
-        'Failed to load events. Please check your connection and try again.',
-        [
-          { text: 'Retry', onPress: () => loadEventsWithLocation(refreshing, userLocation) },
-          { text: 'Cancel', style: 'cancel' },
-        ]
-      );
     } finally {
       setLoadingState(prev => ({
         ...prev,
@@ -124,15 +132,7 @@ export default function EventsScreen() {
         isRefreshing: false,
       }));
     }
-  }, [filters, location]); // Depend on filters and location to reload when they change
-
-  // Load events on component mount and when location changes
-  useEffect(() => {
-    if (hasLocation || isDefaultLocation) {
-      loadEventsWithLocation();
-    }
-  }, [hasLocation, isDefaultLocation, loadEventsWithLocation]);
-
+  }, [hasLocation, isDefaultLocation, filters, location]);
 
   const handleRefresh = useCallback(() => {
     loadEventsWithLocation(true);
@@ -161,6 +161,18 @@ export default function EventsScreen() {
     if (filters.sortBy !== 'default') count++; // Not default sort
     return count;
   }, [filters]);
+
+  const getSortLabel = useCallback(() => {
+    const sortLabels = {
+      'default': '✨ Smart',
+      'distance': '📍 Distance',
+      'time': '⏰ Time',
+      'ending': '⏳ Ending',
+      'type': '🏷️ Type',
+      'title': '🔤 A-Z'
+    };
+    return sortLabels[filters.sortBy] || '✨ Smart';
+  }, [filters.sortBy]);
 
   // Helper functions for UI display
   const getEventTypeColor = (typeAbbr: string) => {
@@ -242,12 +254,15 @@ export default function EventsScreen() {
         </ThemedText>
         <ThemedView style={styles.headerRow}>
           <ThemedText style={styles.headerSubtitle}>
-            Burning Man 2025 • {events.length} events
+            Burning Man 2025 • {events.length} events • {getSortLabel()}
           </ThemedText>
           <ThemedView style={styles.headerButtons}>
             <TouchableOpacity
               onPress={() => setShowNotifications(true)}
               style={styles.notificationButton}
+              accessibilityRole="button"
+              accessibilityLabel="Notification settings"
+              accessibilityHint="Opens notification preferences to configure event alerts"
             >
               <ThemedText style={styles.notificationButtonText}>🔔</ThemedText>
             </TouchableOpacity>
@@ -257,6 +272,9 @@ export default function EventsScreen() {
                 styles.filterButton,
                 getActiveFiltersCount() > 0 && styles.filterButtonActive,
               ]}
+              accessibilityRole="button"
+              accessibilityLabel={getActiveFiltersCount() > 0 ? `Filter events, ${getActiveFiltersCount()} filters active` : 'Filter events'}
+              accessibilityHint="Opens filtering options to refine the event list"
             >
               <ThemedText style={[
                 styles.filterButtonText,
@@ -302,6 +320,10 @@ export default function EventsScreen() {
               }}
               style={styles.locationRefreshButton}
               disabled={isLocationLoading}
+              accessibilityRole="button"
+              accessibilityLabel={isLocationLoading ? 'Getting location' : 'Refresh location'}
+              accessibilityHint="Updates your location and refreshes nearby events"
+              accessibilityState={{ disabled: isLocationLoading }}
             >
               <ThemedText style={styles.locationRefreshText}>
                 {isLocationLoading ? '⏳' : '🔄'}
@@ -328,18 +350,27 @@ export default function EventsScreen() {
             titleColor={Colors.brightWhite}
           />
         }
+        accessibilityLabel={`Event list with ${events.length} events`}
+        accessibilityHint="Scroll to browse events, pull down to refresh"
       >
-        {events.map((event) => {
+        {events.map((event, index) => {
           const countdown = getCountdownInfo(event.start, event.end);
           const eventTypeColor = getEventTypeColor(event.typeAbbr);
           const statusColor = getStatusColor(event.status);
           
           return (
-            <ThemedView key={event.id} style={[
-              styles.eventCard,
-              event.status === 'NOW' && styles.eventCardActive,
-              countdown.isStartingSoon && styles.eventCardSoon,
-            ]}>
+            <ThemedView 
+              key={`${event.id}-${index}`} 
+              style={[
+                styles.eventCard,
+                event.status === 'NOW' && styles.eventCardActive,
+                countdown.isStartingSoon && styles.eventCardSoon,
+              ]}
+              accessible={true}
+              accessibilityRole="article"
+              accessibilityLabel={`${event.title}, ${event.type} event, ${getStatusLabel(event.status)}, ${formatTimeRange(event.start, event.end, true)}`}
+              accessibilityHint={`Event at ${event.locLabel}${event.distance !== null ? `, ${formatDistance(event.distance)} away` : ''}`}
+            >
               <ThemedView style={styles.eventHeader}>
                 <ThemedText type="defaultSemiBold" style={styles.eventTitle}>
                   {event.title}
@@ -419,6 +450,9 @@ export default function EventsScreen() {
                       styles.favoriteButton,
                       isFavorite(event.id) && styles.favoriteButtonActive,
                     ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={isFavorite(event.id) ? `Remove ${event.title} from favorites` : `Add ${event.title} to favorites`}
+                    accessibilityHint={isFavorite(event.id) ? 'Double tap to remove from favorites and stop notifications' : 'Double tap to add to favorites and enable notifications'}
                   >
                     <ThemedText style={[
                       styles.favoriteButtonText,
@@ -716,6 +750,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs / 2,
     borderRadius: 12,
     minHeight: TouchTargets.minCheckbox / 2,
+    // Enhanced for desert visibility
+    borderWidth: 1,
+    borderColor: Colors.brightWhite,
+    shadowColor: Colors.nightBlack,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   
   statusText: {
@@ -741,14 +783,20 @@ const styles = StyleSheet.create({
   },
 
   favoriteButton: {
-    width: TouchTargets.minButton,
+    width: TouchTargets.primaryButton, // Larger for desert conditions
     height: TouchTargets.minButton,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: TouchTargets.minButton / 2,
     backgroundColor: Colors.overlay,
-    borderWidth: 1,
+    borderWidth: 2, // Thicker border for better visibility
     borderColor: Colors.dustGray,
+    // Enhanced shadow for desert visibility
+    shadowColor: Colors.nightBlack,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
 
   favoriteButtonActive: {

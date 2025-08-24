@@ -5,7 +5,6 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-  View,
   StyleSheet,
   Modal,
   TouchableOpacity,
@@ -254,7 +253,7 @@ export function NotificationSettings({ visible, onClose }: NotificationSettingsP
           {/* Info Section */}
           <ThemedView style={styles.infoSection}>
             <ThemedText style={styles.infoText}>
-              💡 Notifications are only sent for events you've favorited (starred). 
+              💡 Notifications are only sent for events you&apos;ve favorited (starred). 
               Star your must-see events to get timely reminders!
             </ThemedText>
           </ThemedView>

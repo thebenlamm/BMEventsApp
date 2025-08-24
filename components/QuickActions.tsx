@@ -5,15 +5,13 @@
 
 import React from 'react';
 import {
-  View,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
 } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
-import { Colors, Spacing, Typography, TouchTargets } from '../constants/Theme';
+import { Colors, Spacing, Typography } from '../constants/Theme';
 import { FilterOptions } from './EventFilters';
 
 interface QuickAction {
@@ -128,72 +126,51 @@ const QUICK_ACTIONS: QuickAction[] = [
     },
     gradient: [Colors.nightBlack, Colors.playaPurple],
   },
+  {
+    id: 'ending-soon',
+    title: 'Ending Soon',
+    icon: '⏳',
+    description: 'Don\'t miss these!',
+    filters: {
+      eventTypes: ['prty', 'food', 'tea', 'arts', 'work', 'kid', 'adlt', 'othr'],
+      showOnlyActive: false,
+      showOnlyUpcoming: true,
+      sortBy: 'ending',
+    },
+    gradient: [Colors.statusEnded, Colors.playaPurple],
+  },
 ];
 
 export function QuickActions({ onActionPress }: QuickActionsProps) {
-  const screenWidth = Dimensions.get('window').width;
-  const actionWidth = (screenWidth - (Spacing.lg * 2) - Spacing.md) / 2; // 2 columns with spacing
-
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="subtitle" style={styles.sectionTitle}>
-        ⚡ Quick Actions
-      </ThemedText>
-      
+    <ThemedView style={styles.container}>      
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         style={styles.scrollView}
       >
-        <View style={styles.actionsGrid}>
-          {QUICK_ACTIONS.map((action, index) => {
-            const isOddRow = Math.floor(index / 2) % 2 === 1;
-            const isSecondColumn = index % 2 === 1;
-            
-            return (
-              <TouchableOpacity
-                key={action.id}
-                onPress={() => onActionPress(action.filters)}
-                style={[
-                  styles.actionButton,
-                  {
-                    width: actionWidth,
-                    backgroundColor: action.gradient[0],
-                  },
-                  // Stagger the layout for visual interest
-                  isOddRow && isSecondColumn && styles.actionButtonOffset,
-                ]}
-                activeOpacity={0.8}
-              >
-                {/* Background gradient effect */}
-                <View 
-                  style={[
-                    styles.gradientOverlay,
-                    { backgroundColor: action.gradient[1] }
-                  ]} 
-                />
-                
-                <View style={styles.actionContent}>
-                  <ThemedText style={styles.actionIcon}>
-                    {action.icon}
-                  </ThemedText>
-                  
-                  <ThemedText type="defaultSemiBold" style={styles.actionTitle}>
-                    {action.title}
-                  </ThemedText>
-                  
-                  <ThemedText style={styles.actionDescription} numberOfLines={2}>
-                    {action.description}
-                  </ThemedText>
-                </View>
-                
-                {/* Subtle border for depth */}
-                <View style={styles.actionBorder} />
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        {QUICK_ACTIONS.map((action) => (
+          <TouchableOpacity
+            key={action.id}
+            onPress={() => onActionPress(action.filters)}
+            style={[
+              styles.actionButton,
+              { backgroundColor: action.gradient[0] },
+            ]}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={action.title}
+            accessibilityHint={action.description}
+          >
+            <ThemedText style={styles.actionIcon}>
+              {action.icon}
+            </ThemedText>
+            <ThemedText style={styles.actionTitle} numberOfLines={1}>
+              {action.title}
+            </ThemedText>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
     </ThemedView>
   );
@@ -202,15 +179,7 @@ export function QuickActions({ onActionPress }: QuickActionsProps) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
-    paddingVertical: Spacing.md,
-  },
-
-  sectionTitle: {
-    fontSize: Typography.titleSmall,
-    color: Colors.brightWhite,
-    fontWeight: 'bold',
-    marginBottom: Spacing.md,
-    marginHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
   },
 
   scrollView: {
@@ -218,87 +187,44 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: Spacing.lg,
-  },
-
-  actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.md,
-    width: 800, // Fixed width for horizontal scrolling
+    paddingHorizontal: Spacing.md,
+    gap: Spacing.sm,
   },
 
   actionButton: {
-    height: 120,
-    borderRadius: 16,
-    overflow: 'hidden',
-    position: 'relative',
+    width: 100,
+    height: 60,
+    borderRadius: 8,
+    marginRight: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: Spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: Colors.nightBlack,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-    minHeight: TouchTargets.minButton * 2.5,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
-  actionButtonOffset: {
-    marginTop: -20, // Create staggered effect
-  },
-
-  gradientOverlay: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: '50%',
-    opacity: 0.3,
-  },
-
-  actionContent: {
-    flex: 1,
-    padding: Spacing.md,
-    justifyContent: 'space-between',
-    zIndex: 2,
-  },
 
   actionIcon: {
-    fontSize: Typography.titleLarge,
-    textAlign: 'left',
-    lineHeight: Typography.titleLarge * 1.2,
+    fontSize: 20,
+    lineHeight: 24,
+    textAlign: 'center',
+    marginBottom: 2,
   },
 
   actionTitle: {
-    fontSize: Typography.titleSmall,
-    color: Colors.brightWhite,
-    fontWeight: 'bold',
-    textShadowColor: Colors.nightBlack,
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-    marginTop: Spacing.xs,
-  },
-
-  actionDescription: {
     fontSize: Typography.bodySmall,
     color: Colors.brightWhite,
-    opacity: 0.9,
+    fontWeight: 'bold',
+    textAlign: 'center',
     textShadowColor: Colors.nightBlack,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
-    lineHeight: Typography.bodySmall * 1.3,
-    marginTop: Spacing.xs,
   },
 
-  actionBorder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
-    pointerEvents: 'none',
-  },
 });
 
 export default QuickActions;
