@@ -90,18 +90,6 @@ const QUICK_ACTIONS: QuickAction[] = [
     gradient: [Colors.eventWork, Colors.dustGray],
   },
   {
-    id: 'kids',
-    title: 'Family Fun',
-    icon: '👶',
-    description: 'Kid-friendly activities',
-    filters: {
-      eventTypes: ['kid'],
-      showOnlyUpcoming: true,
-      sortBy: 'time',
-    },
-    gradient: [Colors.eventKid, Colors.playaGold],
-  },
-  {
     id: 'happening-now',
     title: 'Happening Now',
     icon: '🔴',
@@ -112,32 +100,6 @@ const QUICK_ACTIONS: QuickAction[] = [
       sortBy: 'distance',
     },
     gradient: [Colors.statusLive, Colors.playaOrange],
-  },
-  {
-    id: 'tonight',
-    title: 'Tonight',
-    icon: '🌙',
-    description: 'Events starting after sunset',
-    filters: {
-      eventTypes: ['prty', 'food', 'tea', 'arts', 'work', 'adlt', 'othr'],
-      timeWindow: 12, // Next 12 hours
-      showOnlyUpcoming: true,
-      sortBy: 'time',
-    },
-    gradient: [Colors.nightBlack, Colors.playaPurple],
-  },
-  {
-    id: 'ending-soon',
-    title: 'Ending Soon',
-    icon: '⏳',
-    description: 'Don\'t miss these!',
-    filters: {
-      eventTypes: ['prty', 'food', 'tea', 'arts', 'work', 'kid', 'adlt', 'othr'],
-      showOnlyActive: false,
-      showOnlyUpcoming: true,
-      sortBy: 'ending',
-    },
-    gradient: [Colors.statusEnded, Colors.playaPurple],
   },
 ];
 
