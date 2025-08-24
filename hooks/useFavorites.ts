@@ -40,11 +40,13 @@ export interface UseFavoritesResult extends FavoritesState {
   }) => Promise<boolean>;
   clearAllFavorites: () => Promise<void>;
   refreshFavorites: () => Promise<void>;
-  
+
   // Utilities
   isFavorite: (eventId: string) => boolean;
   getFavoritesByType: (typeAbbr: string) => FavoriteEvent[];
   getUpcomingFavorites: () => FavoriteEvent[];
+  getFavoritesCount: () => Promise<number>;
+  exportFavorites: () => Promise<string>;
 }
 
 export function useFavorites(): UseFavoritesResult {
@@ -196,6 +198,20 @@ export function useFavorites(): UseFavoritesResult {
     return state.favorites.filter(fav => new Date(fav.end) > now);
   }, [state.favorites]);
 
+  /**
+   * Get count of favorites
+   */
+  const getFavoritesCount = useCallback((): Promise<number> => {
+    return favoritesService.getFavoritesCount();
+  }, []);
+
+  /**
+   * Export favorites
+   */
+  const exportFavorites = useCallback((): Promise<string> => {
+    return favoritesService.exportFavorites();
+  }, []);
+
   // Load favorites on mount
   useEffect(() => {
     loadFavorites();
@@ -216,6 +232,8 @@ export function useFavorites(): UseFavoritesResult {
     isFavorite,
     getFavoritesByType,
     getUpcomingFavorites,
+    getFavoritesCount,
+    exportFavorites,
   };
 }
 
