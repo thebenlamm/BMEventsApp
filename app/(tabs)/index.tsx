@@ -111,12 +111,14 @@ export default function EventsScreen() {
     }
   }, [hasLocation, isDefaultLocation, filters, location]);
 
-  // Load events whenever location or filters change
+  // Load events whenever location or filters change. Avoid including the
+  // memoized function itself in the dependency array to prevent it from
+  // being treated as a changing dependency on every render.
   useEffect(() => {
     if (hasLocation || isDefaultLocation) {
       loadEventsWithLocation();
     }
-  }, [loadEventsWithLocation, hasLocation, isDefaultLocation]);
+  }, [hasLocation, isDefaultLocation, filters, location]);
 
   const handleRefresh = useCallback(() => {
     loadEventsWithLocation(true);
