@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 import { useFavorites } from '../hooks/useFavorites';
 import { favoritesService } from '../services/FavoritesService';
 
@@ -13,11 +13,11 @@ const favoriteEvent = {
   locLabel: 'Camp',
 };
 
-const getFavoritesMock = jest.fn().mockResolvedValue([]);
+const mockGetFavorites = jest.fn().mockResolvedValue([]);
 
 jest.mock('../services/FavoritesService', () => ({
   favoritesService: {
-    getFavorites: getFavoritesMock,
+    getFavorites: mockGetFavorites,
     addFavorite: jest.fn().mockResolvedValue(undefined),
     removeFavorite: jest.fn().mockResolvedValue(undefined),
     toggleFavorite: jest.fn().mockResolvedValue(true),
@@ -29,7 +29,7 @@ jest.mock('../services/FavoritesService', () => ({
 
 describe('useFavorites', () => {
   beforeEach(() => {
-    getFavoritesMock.mockResolvedValue([]);
+    mockGetFavorites.mockResolvedValue([]);
   });
 
   it('loads favorites on mount', async () => {
@@ -40,7 +40,7 @@ describe('useFavorites', () => {
   });
 
   it('adds a favorite and refreshes state', async () => {
-    getFavoritesMock
+    mockGetFavorites
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([favoriteEvent]);
 

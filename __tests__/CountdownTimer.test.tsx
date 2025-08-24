@@ -1,5 +1,5 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react-native';
+import React from 'react';
 import CountdownTimer from '../components/CountdownTimer';
 
 // The component uses timers internally, so use fake timers to control time
@@ -29,7 +29,7 @@ describe('CountdownTimer', () => {
     render(<CountdownTimer start={start} end={end} />);
 
     expect(screen.getByText(/Ends in 50m/)).toBeTruthy();
-    const timer = screen.getByA11yRole('timer');
+    const timer = screen.getByRole('timer');
     expect(timer.props.accessibilityLabel).toContain('Event is happening now');
   });
 

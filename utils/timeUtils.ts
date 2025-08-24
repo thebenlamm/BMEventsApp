@@ -227,10 +227,6 @@ export function formatDuration(startDate: Date, endDate: Date): string {
   const hours = Math.floor(durationMinutes / 60);
   const remainingMinutes = durationMinutes % 60;
   
-  if (remainingMinutes === 0) {
-    return `${hours}h`;
-  }
-  
   if (hours >= 24) {
     const days = Math.floor(hours / 24);
     const remainingHours = hours % 24;
@@ -240,6 +236,10 @@ export function formatDuration(startDate: Date, endDate: Date): string {
     }
     
     return `${days}d ${remainingHours}h`;
+  }
+  
+  if (remainingMinutes === 0) {
+    return `${hours}h`;
   }
   
   return `${hours}h ${remainingMinutes}m`;
