@@ -6,7 +6,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   StyleSheet,
-  ScrollView,
+  FlatList,
   RefreshControl,
   Alert,
   ActivityIndicator,
@@ -203,6 +203,125 @@ export default function EventsScreen() {
     return labelMap[status as keyof typeof labelMap] || 'Upcoming';
   };
 
+  const renderEvent = ({ item }: { item: ProcessedEvent }) => {
+    const countdown = getCountdownInfo(item.start, item.end);
+    const eventTypeColor = getEventTypeColor(item.typeAbbr);
+    const statusColor = getStatusColor(item.status);
+
+    return (
+      <ThemedView
+        style={[
+          styles.eventCard,
+          item.status === 'NOW' && styles.eventCardActive,
+          countdown.isStartingSoon && styles.eventCardSoon,
+        ]}
+        accessible={true}
+        accessibilityRole="article"
+        accessibilityLabel={`${item.title}, ${item.type} event, ${getStatusLabel(item.status)}, ${formatTimeRange(item.start, item.end, true)}`}
+        accessibilityHint={`Event at ${item.locLabel}${item.distance !== null ? `, ${formatDistance(item.distance)} away` : ''}`}
+      >
+        <ThemedView style={styles.eventHeader}>
+          <ThemedText type="defaultSemiBold" style={styles.eventTitle}>
+            {item.title}
+          </ThemedText>
+          <ThemedView
+            style={[
+              styles.eventTypeBadge,
+              { backgroundColor: eventTypeColor },
+            ]}
+          >
+            <ThemedText style={styles.eventTypeText}>
+              {item.type}
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
+
+        {/* Status and countdown */}
+        <ThemedView style={styles.statusRow}>
+          <ThemedView
+            style={[
+              styles.statusBadge,
+              { backgroundColor: statusColor },
+            ]}
+          >
+            <ThemedText style={styles.statusText}>
+              {getStatusIcon(item.status)} {getStatusLabel(item.status)}
+            </ThemedText>
+          </ThemedView>
+
+          <CountdownTimer
+            start={item.start}
+            end={item.end}
+            textStyle={styles.countdownText}
+            urgentStyle={styles.countdownUrgent}
+          />
+        </ThemedView>
+
+        <ThemedText style={styles.eventLocation}>
+          📍 {item.locLabel}
+          {item.distance !== null && (
+            <ThemedText style={styles.distanceText}>
+              {' • '}{formatDistance(item.distance)}
+            </ThemedText>
+          )}
+        </ThemedText>
+
+        <ThemedText style={styles.eventDescription} numberOfLines={3}>
+          {item.description}
+        </ThemedText>
+
+        <ThemedView style={styles.eventFooter}>
+          <ThemedText style={styles.eventTime}>
+            ⏰ {formatTimeRange(item.start, item.end, true)}
+          </ThemedText>
+          <ThemedView style={styles.eventFooterRight}>
+            {item.isRecurring && item.futureOccurrences && (
+              <ThemedView style={styles.recurringBadge}>
+                <ThemedText style={styles.recurringText}>
+                  🔄 {item.futureOccurrences}
+                </ThemedText>
+              </ThemedView>
+            )}
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  await toggleFavorite({
+                    id: item.id,
+                    eventUid: item.eventUid,
+                    title: item.title,
+                    start: item.start,
+                    end: item.end,
+                    type: item.type,
+                    typeAbbr: item.typeAbbr,
+                    locLabel: item.locLabel,
+                  });
+                } catch (error) {
+                  Alert.alert('Error', 'Failed to update favorite');
+                }
+              }}
+              style={[
+                styles.favoriteButton,
+                isFavorite(item.id) && styles.favoriteButtonActive,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={isFavorite(item.id) ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`}
+              accessibilityHint={isFavorite(item.id) ? 'Double tap to remove from favorites and stop notifications' : 'Double tap to add to favorites and enable notifications'}
+            >
+              <ThemedText
+                style={[
+                  styles.favoriteButtonText,
+                  isFavorite(item.id) && styles.favoriteButtonTextActive,
+                ]}
+              >
+                {isFavorite(item.id) ? '⭐' : '☆'}
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        </ThemedView>
+      </ThemedView>
+    );
+  };
+
 
   if (loadingState.isLoading) {
     return (
@@ -321,7 +440,10 @@ export default function EventsScreen() {
       <QuickActions onActionPress={handleQuickAction} />
 
       {/* Events List */}
-      <ScrollView
+      <FlatList
+        data={events}
+        keyExtractor={(event) => event.id}
+        renderItem={renderEvent}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
@@ -336,132 +458,19 @@ export default function EventsScreen() {
         }
         accessibilityLabel={`Event list with ${events.length} events`}
         accessibilityHint="Scroll to browse events, pull down to refresh"
-      >
-        {events.map((event, index) => {
-          const countdown = getCountdownInfo(event.start, event.end);
-          const eventTypeColor = getEventTypeColor(event.typeAbbr);
-          const statusColor = getStatusColor(event.status);
-          
-          return (
-            <ThemedView 
-              key={`${event.id}-${index}`} 
-              style={[
-                styles.eventCard,
-                event.status === 'NOW' && styles.eventCardActive,
-                countdown.isStartingSoon && styles.eventCardSoon,
-              ]}
-              accessible={true}
-              accessibilityRole="article"
-              accessibilityLabel={`${event.title}, ${event.type} event, ${getStatusLabel(event.status)}, ${formatTimeRange(event.start, event.end, true)}`}
-              accessibilityHint={`Event at ${event.locLabel}${event.distance !== null ? `, ${formatDistance(event.distance)} away` : ''}`}
-            >
-              <ThemedView style={styles.eventHeader}>
-                <ThemedText type="defaultSemiBold" style={styles.eventTitle}>
-                  {event.title}
-                </ThemedText>
-                <ThemedView style={[
-                  styles.eventTypeBadge,
-                  { backgroundColor: eventTypeColor }
-                ]}>
-                  <ThemedText style={styles.eventTypeText}>
-                    {event.type}
-                  </ThemedText>
-                </ThemedView>
-              </ThemedView>
-              
-              {/* Status and countdown */}
-              <ThemedView style={styles.statusRow}>
-                <ThemedView style={[
-                  styles.statusBadge,
-                  { backgroundColor: statusColor }
-                ]}>
-                  <ThemedText style={styles.statusText}>
-                    {getStatusIcon(event.status)} {getStatusLabel(event.status)}
-                  </ThemedText>
-                </ThemedView>
-                
-                <CountdownTimer
-                  start={event.start}
-                  end={event.end}
-                  textStyle={styles.countdownText}
-                  urgentStyle={styles.countdownUrgent}
-                />
-              </ThemedView>
-              
-              <ThemedText style={styles.eventLocation}>
-                📍 {event.locLabel}
-                {event.distance !== null && (
-                  <ThemedText style={styles.distanceText}>
-                    {' • '}{formatDistance(event.distance)}
-                  </ThemedText>
-                )}
+        ListEmptyComponent={
+          !loadingState.isLoading ? (
+            <ThemedView style={styles.emptyState}>
+              <ThemedText type="title" style={styles.emptyTitle}>
+                🏜️ No Events Found
               </ThemedText>
-              
-              <ThemedText style={styles.eventDescription} numberOfLines={3}>
-                {event.description}
+              <ThemedText style={styles.emptySubtitle}>
+                Try adjusting your filters or pull to refresh
               </ThemedText>
-              
-              <ThemedView style={styles.eventFooter}>
-                <ThemedText style={styles.eventTime}>
-                  ⏰ {formatTimeRange(event.start, event.end, true)}
-                </ThemedText>
-                <ThemedView style={styles.eventFooterRight}>
-                  {event.isRecurring && event.futureOccurrences && (
-                    <ThemedView style={styles.recurringBadge}>
-                      <ThemedText style={styles.recurringText}>
-                        🔄 {event.futureOccurrences}
-                      </ThemedText>
-                    </ThemedView>
-                  )}
-                  <TouchableOpacity
-                    onPress={async () => {
-                      try {
-                        await toggleFavorite({
-                          id: event.id,
-                          eventUid: event.eventUid,
-                          title: event.title,
-                          start: event.start,
-                          end: event.end,
-                          type: event.type,
-                          typeAbbr: event.typeAbbr,
-                          locLabel: event.locLabel,
-                        });
-                      } catch (error) {
-                        Alert.alert('Error', 'Failed to update favorite');
-                      }
-                    }}
-                    style={[
-                      styles.favoriteButton,
-                      isFavorite(event.id) && styles.favoriteButtonActive,
-                    ]}
-                    accessibilityRole="button"
-                    accessibilityLabel={isFavorite(event.id) ? `Remove ${event.title} from favorites` : `Add ${event.title} to favorites`}
-                    accessibilityHint={isFavorite(event.id) ? 'Double tap to remove from favorites and stop notifications' : 'Double tap to add to favorites and enable notifications'}
-                  >
-                    <ThemedText style={[
-                      styles.favoriteButtonText,
-                      isFavorite(event.id) && styles.favoriteButtonTextActive,
-                    ]}>
-                      {isFavorite(event.id) ? '⭐' : '☆'}
-                    </ThemedText>
-                  </TouchableOpacity>
-                </ThemedView>
-              </ThemedView>
             </ThemedView>
-          );
-        })}
-        
-        {events.length === 0 && !loadingState.isLoading && (
-          <ThemedView style={styles.emptyState}>
-            <ThemedText type="title" style={styles.emptyTitle}>
-              🏜️ No Events Found
-            </ThemedText>
-            <ThemedText style={styles.emptySubtitle}>
-              Try adjusting your filters or pull to refresh
-            </ThemedText>
-          </ThemedView>
-        )}
-      </ScrollView>
+          ) : null
+        }
+      />
 
       {/* Event Filters Modal */}
       <EventFilters
